@@ -1,0 +1,32 @@
+buildscript {
+    repositories {
+        maven { url "http://repo.spring.io/libs-release" }
+        mavenLocal()
+    }
+}
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
+
+jar {
+    baseName = 'mqtt-integration'
+    version =  '0.99'
+}
+
+repositories {
+    mavenCentral()
+    maven { url "http://repo.spring.io/libs-release" }
+}
+
+dependencies {
+    compile('org.codehaus.groovy:groovy-all:2.4.7')
+    compile('org.eclipse.paho:mqtt-client:0.4.0')
+    compile('org.apache.avro:avro:1.8.1')
+
+    testCompile('org.spockframework:spock-core:1.1-groovy-2.4-rc-3')
+    testCompile('junit:junit:4.11')
+}
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '2.4'
+}
