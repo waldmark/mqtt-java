@@ -3,14 +3,11 @@ package demo.mqtt
 import groovy.json.JsonBuilder
 import groovy.json.JsonSlurper
 import org.apache.avro.Schema
-import org.apache.avro.generic.GenericDatumReader
-import org.apache.avro.generic.GenericDatumWriter
-import org.apache.avro.generic.GenericRecord
-import org.apache.avro.io.*
 import org.apache.avro.reflect.ReflectData
-import org.apache.avro.reflect.ReflectDatumWriter
 import spock.lang.Shared
 import spock.lang.Specification
+
+import static demo.mqtt.AvroUtils.*
 
 class AvroSpec extends Specification {
 
@@ -100,39 +97,39 @@ class AvroSpec extends Specification {
         then:
         avroByteArray.toString() == '[12, 65, 76, 45, 50, 50, 50, 72, 28, 116, 101, 115, 116, 32, 97, 108, 97, 114, 109, 32, 48, 52, 52]'
     }
-
-    static byte[] fromJasonStringToAvro(json, avsc) throws Exception {
-        InputStream input = new ByteArrayInputStream(json.getBytes());
-        DataInputStream din = new DataInputStream(input);
-        Decoder decoder = DecoderFactory.get().jsonDecoder(avsc, din);
-
-        DatumReader<Object> reader = new GenericDatumReader<Object>(avsc);
-        Object datum = reader.read(null, decoder);
-
-        GenericDatumWriter<Object> w = new GenericDatumWriter<Object>(avsc);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-
-        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
-        w.write(datum, e);
-        e.flush();
-
-        return outputStream.toByteArray();
-    }
-
-    static String fromAvroToJSONString(avroByteArray, avsc) {
-        BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(avroByteArray, null)
-        DatumReader<?> reader = new GenericDatumReader<GenericRecord>(avsc)
-        GenericRecord result = reader.read(null, decoder)
-        result.toString()
-    }
-
-    static byte[] fromJavaObjectToAvro(object, klass) throws Exception {
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
-        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
-        ReflectDatumWriter w = new ReflectDatumWriter<?>(klass);
-        w.write(object, e)
-        e.flush()
-        return outputStream.toByteArray();
-    }
+//
+//    static byte[] fromJasonStringToAvro(json, avsc) throws Exception {
+//        InputStream input = new ByteArrayInputStream(json.getBytes());
+//        DataInputStream din = new DataInputStream(input);
+//        Decoder decoder = DecoderFactory.get().jsonDecoder(avsc, din);
+//
+//        DatumReader<Object> reader = new GenericDatumReader<Object>(avsc);
+//        Object datum = reader.read(null, decoder);
+//
+//        GenericDatumWriter<Object> w = new GenericDatumWriter<Object>(avsc);
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+//
+//        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
+//        w.write(datum, e);
+//        e.flush();
+//
+//        return outputStream.toByteArray();
+//    }
+//
+//    static String fromAvroToJSONString(avroByteArray, avsc) {
+//        BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(avroByteArray, null)
+//        DatumReader<?> reader = new GenericDatumReader<GenericRecord>(avsc)
+//        GenericRecord result = reader.read(null, decoder)
+//        result.toString()
+//    }
+//
+//    static byte[] fromJavaObjectToAvro(object, klass) throws Exception {
+//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
+//        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
+//        ReflectDatumWriter w = new ReflectDatumWriter<?>(klass);
+//        w.write(object, e)
+//        e.flush()
+//        return outputStream.toByteArray();
+//    }
 
 }
