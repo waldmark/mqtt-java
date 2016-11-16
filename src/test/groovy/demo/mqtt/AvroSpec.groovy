@@ -13,13 +13,9 @@ class AvroSpec extends Specification {
 
     @Shared
     Schema avsc
-    @Shared
-    JsonSlurper jsonSlurper
-
 
     def setupSpec() {
         avsc = ReflectData.get().getSchema(Alarm.class)
-        jsonSlurper = new JsonSlurper()
     }
 
     /*
@@ -48,6 +44,7 @@ class AvroSpec extends Specification {
 
         when: "the Avro binary is converted back to a JSON string"
         String avroJSON = fromAvroToJSONString(avroByteArray, avsc)
+        def jsonSlurper = new JsonSlurper()
         def jsonObject = jsonSlurper.parseText(avroJSON.toString())
 
         then: "the JSON string can be slurped and the correct values are returned"
@@ -74,6 +71,7 @@ class AvroSpec extends Specification {
 
         when: "the Avro binary is converted back to a JSON string"
         String avroJSON = fromAvroToJSONString(avro, avsc)
+        def jsonSlurper = new JsonSlurper()
         def jsonObject = jsonSlurper.parseText(avroJSON.toString())
 
         then: "the JSON string can be slurped and the correct values are returned"
@@ -83,7 +81,6 @@ class AvroSpec extends Specification {
         'test alarm 022' == jsonObject.description
     }
 
-
     /*
      * Test converting Java object into Avro byte array
      */
@@ -92,44 +89,24 @@ class AvroSpec extends Specification {
         Alarm alarm2 = new Alarm(name: "AL-222", code: 044, description: "test alarm 044")
 
         when:
-        byte[] avroByteArray = fromJavaObjectToAvro(alarm2, Alarm.class)
+        byte[] avroByteArray = fromJavaObjectToAvro(alarm2, alarm2.class)
 
         then:
         avroByteArray.toString() == '[12, 65, 76, 45, 50, 50, 50, 72, 28, 116, 101, 115, 116, 32, 97, 108, 97, 114, 109, 32, 48, 52, 52]'
     }
-//
-//    static byte[] fromJasonStringToAvro(json, avsc) throws Exception {
-//        InputStream input = new ByteArrayInputStream(json.getBytes());
-//        DataInputStream din = new DataInputStream(input);
-//        Decoder decoder = DecoderFactory.get().jsonDecoder(avsc, din);
-//
-//        DatumReader<Object> reader = new GenericDatumReader<Object>(avsc);
-//        Object datum = reader.read(null, decoder);
-//
-//        GenericDatumWriter<Object> w = new GenericDatumWriter<Object>(avsc);
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-//
-//        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
-//        w.write(datum, e);
-//        e.flush();
-//
-//        return outputStream.toByteArray();
-//    }
-//
-//    static String fromAvroToJSONString(avroByteArray, avsc) {
-//        BinaryDecoder decoder = DecoderFactory.get().binaryDecoder(avroByteArray, null)
-//        DatumReader<?> reader = new GenericDatumReader<GenericRecord>(avsc)
-//        GenericRecord result = reader.read(null, decoder)
-//        result.toString()
-//    }
-//
-//    static byte[] fromJavaObjectToAvro(object, klass) throws Exception {
-//        ByteArrayOutputStream outputStream = new ByteArrayOutputStream()
-//        Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
-//        ReflectDatumWriter w = new ReflectDatumWriter<?>(klass);
-//        w.write(object, e)
-//        e.flush()
-//        return outputStream.toByteArray();
-//    }
 
+    /*
+  * Test converting Avro byte array into Java object
+  */
+    def "convert Avro to Java object"() {
+        given:
+        Alarm expectedAlarm = new Alarm(name: "AL-222", code: 044, description: "test alarm 044")
+        byte[] providedAvroBytes = [12, 65, 76, 45, 50, 50, 50, 72, 28, 116, 101, 115, 116, 32, 97, 108, 97, 114, 109, 32, 48, 52, 52]
+
+        when:
+        Alarm result = fromAvroToJavaObject(providedAvroBytes, expectedAlarm.class)
+
+        then:
+        result == expectedAlarm
+    }
 }
