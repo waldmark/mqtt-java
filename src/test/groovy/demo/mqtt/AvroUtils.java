@@ -12,7 +12,7 @@ import java.io.*;
 
 public class AvroUtils {
 
-    public static byte[] fromJasonStringToAvro(String json, Schema avsc) throws Exception {
+    public static byte[] fromJasonStringToAvro(String json, Schema avsc) throws IOException {
         InputStream input = new ByteArrayInputStream(json.getBytes());
         DataInputStream din = new DataInputStream(input);
         Decoder decoder = DecoderFactory.get().jsonDecoder(avsc, din);
@@ -36,7 +36,7 @@ public class AvroUtils {
         return result.toString();
     }
 
-    public static <V> byte[] fromJavaObjectToAvro(V object, Class<V> klass) throws Exception {
+    public static <V> byte[] fromJavaObjectToAvro(V object, Class<V> klass) throws IOException {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         Encoder e = EncoderFactory.get().binaryEncoder(outputStream, null);
         ReflectDatumWriter<V> w = new ReflectDatumWriter<>(klass);
@@ -45,7 +45,8 @@ public class AvroUtils {
         return outputStream.toByteArray();
     }
 
-    public static <V> V fromAvroToJavaObject(byte[] bytes, Class<V> klass) throws Exception{
+    public static <V> V fromAvroToJavaObject(byte[] bytes, Class<V> klass)
+            throws IllegalAccessException, InstantiationException, IOException {
         ReflectDatumReader<V> reader = new ReflectDatumReader<V>(klass);
         BinaryDecoder binDecoder = DecoderFactory.get().binaryDecoder(bytes, null);
         V obj = klass.newInstance();
